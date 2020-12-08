@@ -1235,13 +1235,13 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 			clear_command_queue();
 			quickstop_stepper();
 			delay(5);
+      planner.set_e_position_mm((destination[E_CART] = current_position[E_CART] = resume_e_position));
 			if (menu_type == eMENU_UTILI_FILA)
 			{
 				LGT_Change_Page(ID_MENU_UTILI_FILA_0 + menu_fila_type_chk);
 			}
 			else if (menu_type == eMENU_HOME_FILA)
 			{
-				//planner.set_e_position_mm((destination[E_CART] = current_position[E_CART] = resume_e_position));
 				LGT_Change_Page(ID_MENU_HOME_FILA_0);
 			}
 			break;
@@ -1249,13 +1249,13 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 			clear_command_queue();
 			quickstop_stepper();
 			delay(5);
-			if (menu_type == eMENU_UTILI_FILA)
+      planner.set_e_position_mm((destination[E_CART] = current_position[E_CART] = resume_e_position));
+      if (menu_type == eMENU_UTILI_FILA)
 			{
 				LGT_Change_Page(ID_MENU_UTILI_FILA_0 + menu_fila_type_chk);
 			}
 			else if (menu_type == eMENU_HOME_FILA)
 			{
-				//planner.set_e_position_mm((destination[E_CART] = current_position[E_CART] = resume_e_position));
 				LGT_Change_Page(ID_DIALOG_LOAD_FINISH);
 //				MYSERIAL0.println(ID_DIALOG_LOAD_FINISH);
 			}
@@ -1303,6 +1303,9 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 				menu_type = eMENU_HOME;
 			break;
 		case eBT_PRINT_FILE_CLEAN: //Cleaning sel_fileid
+      card.initsd();
+      delay(2);
+      
 			if (sel_fileid > -1)
 			{
 				DEHILIGHT_FILE_NAME();
@@ -1494,6 +1497,8 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 					xyz_home = false;
 					enqueue_and_echo_commands_P(PSTR("G1 Z10"));	//up 10mm to prevent from damaging bed
 				}
+        LGT_Change_Page(ID_MENU_HOME);
+        menu_type = eMENU_HOME;
 			#endif
 			break;
 	#ifdef LK1_Pro
@@ -1610,6 +1615,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 		break;
 	case ADDR_VAL_FLOW:
 		planner.flow_percentage[0] = Rec_Data.data[0];
+    planner.refresh_e_factor(0);
 		break;
 	case ADDR_VAL_MENU_TYPE:
 		menu_type = (E_MENU_TYPE)(Rec_Data.data[0]);
@@ -1766,8 +1772,25 @@ void LGT_SCR::LGT_Main_Function()
 	#endif // LK1_Pro
 	LGT_SDCard_Status_Update();
 }
+
+uint16_t sent_progress_percent = 0;
+uint16_t sent_LGT_feedrate = 0;
+int16_t sent_height = 0;
+int16_t sent_temp_hotend = 0;
+int16_t sent_temp_bed = 0;
+int16_t sent_fanspeed = 0;
+uint8_t sent_feedrate_percentage = 0;
+uint8_t sent_flow_percentage = 0;
+uint8_t sent_skip_tick = 0;
+
 void LGT_SCR::LGT_Printer_Data_Updata()
 {
+
+//  SERIAL_PROTOCOLPAIR("\nDialog=", menu_type);
+//  SERIAL_PROTOCOLPAIR(" sent_fanspeed=", sent_fanspeed);
+//  SERIAL_PROTOCOLPAIR(" sent_skip_tick=", sent_skip_tick);
+
+  
 	uint8_t progress_percent = 0;
 	uint16_t LGT_feedrate = 0;
 	switch (menu_type)
@@ -1775,6 +1798,11 @@ void LGT_SCR::LGT_Printer_Data_Updata()
 	case eMENU_HOME:
 		LGT_Send_Data_To_Screen(ADDR_VAL_CUR_E, (int16_t)thermalManager.current_temperature[0]);
 		LGT_Send_Data_To_Screen(ADDR_VAL_CUR_B, (int16_t)thermalManager.current_temperature_bed);
+    LGT_Get_MYSERIAL1_Cmd();
+    LGT_Send_Data_To_Screen(ADDR_VAL_FAN,fanSpeeds[0]);
+    LGT_Send_Data_To_Screen(ADDR_VAL_FEED,feedrate_percentage);
+    LGT_Send_Data_To_Screen(ADDR_VAL_FLOW,planner.flow_percentage[0]);
+
 		break;
 	case eMENU_TUNE:
 		LGT_Send_Data_To_Screen(ADDR_VAL_CUR_E, (int16_t)thermalManager.current_temperature[0]);
@@ -1806,7 +1834,6 @@ void LGT_SCR::LGT_Printer_Data_Updata()
 		if (LGT_feedrate > 3000)
 			LGT_feedrate = 3000;
 		LGT_Send_Data_To_Screen(ADDR_VAL_CUR_FEED, LGT_feedrate);
-//		LGT_Send_Data_To_Screen(ADDR_VAL_CUR_FEED,(uint16_t)(MMS_SCALED(feedrate_mm_s) * 10));
 		break;
 	case eMENU_TUNE_FLOW:
 		LGT_Send_Data_To_Screen(ADDR_VAL_FLOW,planner.flow_percentage[0]);
@@ -1818,23 +1845,73 @@ void LGT_SCR::LGT_Printer_Data_Updata()
 		break;
 	case eMENU_PRINT_HOME:
 		progress_percent = card.percentDone();
-		if(progress_percent>0)
-			LGT_Send_Data_To_Screen(ADDR_VAL_HOME_PROGRESS, (uint16_t)progress_percent);
-		else
-			LGT_Send_Data_To_Screen(ADDR_VAL_HOME_PROGRESS, (uint16_t)recovery_percent);
-
-		Duration_Time = (print_job_timer.duration()) + recovery_time;
-		Duration_Time.toDigital(total_time);
-		LGT_Send_Data_To_Screen(ADDR_TXT_HOME_ELAP_TIME,total_time);
+		if(progress_percent>0){
+        if (sent_progress_percent != (uint16_t)progress_percent){
+          sent_progress_percent = (uint16_t)progress_percent;
+		    	LGT_Send_Data_To_Screen(ADDR_VAL_HOME_PROGRESS, (uint16_t)progress_percent);
+        }
+		}
+		else{
+        if (sent_progress_percent != (uint16_t)recovery_percent){
+          sent_progress_percent = (uint16_t)recovery_percent;
+        	LGT_Send_Data_To_Screen(ADDR_VAL_HOME_PROGRESS, (uint16_t)recovery_percent);
+        }
+		}
 		//delay(10);
-		LGT_Send_Data_To_Screen(ADDR_VAL_HOME_Z_HEIGHT, (int16_t)((current_position[Z_AXIS] + recovery_z_height) * 10));  //Current Z height
-		LGT_Send_Data_To_Screen(ADDR_VAL_CUR_E, (int16_t)thermalManager.current_temperature[0]);
-		LGT_Send_Data_To_Screen(ADDR_VAL_CUR_B, (int16_t)thermalManager.current_temperature_bed);
+    if ((int16_t)((current_position[Z_AXIS] + recovery_z_height) * 10) != sent_height){
+      sent_height = (int16_t)((current_position[Z_AXIS] + recovery_z_height) * 10);
+		  LGT_Send_Data_To_Screen(ADDR_VAL_HOME_Z_HEIGHT, sent_height);  //Current Z height
+    }
+    
+    if ((int16_t)thermalManager.current_temperature[0] != sent_temp_hotend){
+      sent_temp_hotend = (int16_t)thermalManager.current_temperature[0];
+      LGT_Send_Data_To_Screen(ADDR_VAL_CUR_E, sent_temp_hotend);
+    }
+    if ((int16_t)thermalManager.current_temperature_bed != sent_temp_bed){
+      sent_temp_bed = (int16_t)thermalManager.current_temperature_bed;
+		  LGT_Send_Data_To_Screen(ADDR_VAL_CUR_B, sent_temp_bed);
+    }
+    
+    if (fanSpeeds[0] != sent_fanspeed){
+      sent_fanspeed = fanSpeeds[0];
+      LGT_Send_Data_To_Screen(ADDR_VAL_FAN,sent_fanspeed);
+    }
+    
+    if (feedrate_percentage != sent_feedrate_percentage){
+      sent_feedrate_percentage = feedrate_percentage;
+      LGT_Send_Data_To_Screen(ADDR_VAL_FEED,feedrate_percentage);
+    }
+    
+    if (planner.flow_percentage[0] != sent_flow_percentage){
+      sent_flow_percentage = planner.flow_percentage[0];
+      LGT_Send_Data_To_Screen(ADDR_VAL_FLOW, sent_flow_percentage);
+    }
+
+    LGT_feedrate = (uint16_t)(MMS_SCALED(feedrate_mm_s) * 10);
+    if (LGT_feedrate > 3000)
+      LGT_feedrate = 3000;
+    if (sent_LGT_feedrate != LGT_feedrate){
+      sent_LGT_feedrate = LGT_feedrate;
+      LGT_Send_Data_To_Screen(ADDR_VAL_CUR_FEED, LGT_feedrate);
+    }
+
+    if (sent_skip_tick == 0){
+      Duration_Time = (print_job_timer.duration()) + recovery_time;
+      Duration_Time.toDigital(total_time);
+      LGT_Send_Data_To_Screen(ADDR_TXT_HOME_ELAP_TIME,total_time);
+    }
+    sent_skip_tick++;
+    if (sent_skip_tick > 30){
+      sent_skip_tick = 0;
+    }
+    
+
 		break;
 	default:
 		break;
 	}
 }
+
 void LGT_SCR::LGT_Printer_Light_Update()
 {
 	if (LGT_is_printing == false&&((thermalManager.current_temperature_bed < thermalManager.target_temperature_bed)

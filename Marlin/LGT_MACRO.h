@@ -171,6 +171,7 @@
 #define ADDR_TXT_PRINT_FILE_SELECT          (ADDR_VAL_PRINT_FILE_SELECT + LEN_WORD)         // 1552  
 
 #define ADDR_KILL_REASON                     (0x2000) 
+#define ADDR_TXT_PRINT_M117                     (ADDR_KILL_REASON + LEN_FILE_NAME)          //2020
 
 // SP definition
 #define SP_TXT_PRINT_FILE_ITEM_0            (0x6000)                                        // 6000
