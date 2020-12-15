@@ -1053,11 +1053,11 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 				enqueue_and_echo_commands_P(PSTR("G28"));
 				xy_home = true;
 			#else
-				#ifdef LK4_Pro_BLTOUCH
+//				#ifdef LK4_Pro_BLTOUCH
 					enqueue_and_echo_commands_P(PSTR("G28")); //LK4_Pro
-				#else
-					enqueue_and_echo_commands_P(PSTR("G28 Z0")); //LK4_Pro
-				#endif // LK4_Pro_BLTOUCH
+//				#else
+//					enqueue_and_echo_commands_P(PSTR("G28 Z0")); //LK4_Pro
+//				#endif // LK4_Pro_BLTOUCH
 				z_home = true;
 			#endif
 			break;
@@ -1303,9 +1303,13 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 				menu_type = eMENU_HOME;
 			break;
 		case eBT_PRINT_FILE_CLEAN: //Cleaning sel_fileid
+      SERIAL_PROTOCOLPAIR("\nReinit sd card", menu_type);
+
       card.initsd();
+      sd_init_flag = false;
       delay(2);
-      
+			LGT_Display_Filename();
+
 			if (sel_fileid > -1)
 			{
 				DEHILIGHT_FILE_NAME();

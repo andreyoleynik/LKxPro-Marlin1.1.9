@@ -1,4 +1,4 @@
-/**
+  /**
  * Marlin 3D Printer Firmware
  * Copyright (C) 2016 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
  *
@@ -421,9 +421,10 @@
 //	#define DEFAULT_Kd 84.46
 //#endif
 
-#define DEFAULT_Kp 30.50
-#define DEFAULT_Ki 2.89
-#define DEFAULT_Kd 80.57
+#define DEFAULT_Kp 10.64
+#define DEFAULT_Ki 0.60
+#define DEFAULT_Kd 46.87
+
 
   // MakerGear
   //#define DEFAULT_Kp 7.0
@@ -556,16 +557,16 @@
 //#define USE_ZMAX_PLUG
 
 // Enable pullup for all endstops to prevent a floating state
-#define ENDSTOPPULLUPS
+//#define ENDSTOPPULLUPS
 #if DISABLED(ENDSTOPPULLUPS)
   // Disable ENDSTOPPULLUPS to set pullups individually
   //#define ENDSTOPPULLUP_XMAX
   //#define ENDSTOPPULLUP_YMAX
   //#define ENDSTOPPULLUP_ZMAX
-  //#define ENDSTOPPULLUP_XMIN
-  //#define ENDSTOPPULLUP_YMIN
+  #define ENDSTOPPULLUP_XMIN
+  #define ENDSTOPPULLUP_YMIN
   //#define ENDSTOPPULLUP_ZMIN
-  //#define ENDSTOPPULLUP_ZMIN_PROBE
+//  #define ENDSTOPPULLUP_ZMIN_PROBE
 #endif
 //#if ENABLED (LK1_Pro_AutoBed)
 //	#if ENABLED ( ENDSTOPPULLUPS)
@@ -583,7 +584,7 @@
 #ifdef LK1_Pro
 	#define Z_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #else //LK4_Pro
-	#define Z_MIN_ENDSTOP_INVERTING true // set to true to invert the logic of the endstop.
+	#define Z_MIN_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #endif
 #define X_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
 #define Y_MAX_ENDSTOP_INVERTING false // set to true to invert the logic of the endstop.
@@ -662,7 +663,7 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4]]]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 92.599 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 411 }
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -779,8 +780,8 @@
 /**
  * Z Servo Probe, such as an endstop switch on a rotating arm.
  */
-//#define Z_PROBE_SERVO_NR 0   // Defaults to SERVO 0 connector.
-//#define Z_SERVO_ANGLES {70,0}  // Z Servo Deploy and Stow angles
+#define Z_PROBE_SERVO_NR 0   // Defaults to SERVO 0 connector.
+#define Z_SERVO_ANGLES {10,90}  // Z Servo Deploy and Stow angles
 
 /**
  * The BLTouch probe uses a Hall effect sensor and emulates a servo.
@@ -837,15 +838,19 @@
  *      O-- FRONT --+
  *    (0,0)
  */
-#if  ENABLED(LK1_Pro_AutoBed)
-	#define X_PROBE_OFFSET_FROM_EXTRUDER -30//-23  // X offset: -left  +right  [of the nozzle]
-	#define Y_PROBE_OFFSET_FROM_EXTRUDER -3//0 // Y offset: -front +behind [the nozzle]
-	#define Z_PROBE_OFFSET_FROM_EXTRUDER 0 //0  // Z offset: -below +above  [the nozzle]
-#elif ENABLED(LK4_Pro_BLTOUCH) 
-	#define X_PROBE_OFFSET_FROM_EXTRUDER -36 // X offset: -left  +right  [of the nozzle]
-	#define Y_PROBE_OFFSET_FROM_EXTRUDER -4 // Y offset: -front +behind [the nozzle]
-	#define Z_PROBE_OFFSET_FROM_EXTRUDER -0.4 // Z offset: -below +above  [the nozzle]
-#endif // LK1_Pro_AutoBed
+//#if  ENABLED(LK1_Pro_AutoBed)
+//	#define X_PROBE_OFFSET_FROM_EXTRUDER -30//-23  // X offset: -left  +right  [of the nozzle]
+//	#define Y_PROBE_OFFSET_FROM_EXTRUDER -3//0 // Y offset: -front +behind [the nozzle]
+//	#define Z_PROBE_OFFSET_FROM_EXTRUDER 0 //0  // Z offset: -below +above  [the nozzle]
+//#elif ENABLED(LK4_Pro_BLTOUCH) 
+//	#define X_PROBE_OFFSET_FROM_EXTRUDER -36 // X offset: -left  +right  [of the nozzle]
+//	#define Y_PROBE_OFFSET_FROM_EXTRUDER -4 // Y offset: -front +behind [the nozzle]
+//	#define Z_PROBE_OFFSET_FROM_EXTRUDER -0.4 // Z offset: -below +above  [the nozzle]
+//#endif // LK1_Pro_AutoBed
+
+  #define X_PROBE_OFFSET_FROM_EXTRUDER -41//-23  // X offset: -left  +right  [of the nozzle]
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 5//0 // Y offset: -front +behind [the nozzle]
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0 //0  // Z offset: -below +above  [the nozzle]
 
 // Certain types of probes need to stay away from edges
 #define MIN_PROBE_EDGE 10
@@ -890,7 +895,7 @@
 #define Z_PROBE_OFFSET_RANGE_MAX 20
 
 // Enable the M48 repeatability test to test probe accuracy
-//#define Z_MIN_PROBE_REPEATABILITY_TEST
+#define Z_MIN_PROBE_REPEATABILITY_TEST
 
 // For Inverting Stepper Enable Pins (Active Low) use 0, Non Inverting (Active High) use 1
 // :{ 0:'Low', 1:'High' }
@@ -925,7 +930,7 @@
 #ifdef LK1_Pro
 	#define INVERT_E0_DIR false
 #else
-	#define INVERT_E0_DIR true
+	#define INVERT_E0_DIR false
 #endif // LK1_Pro
 #define INVERT_E1_DIR false
 #define INVERT_E2_DIR false
@@ -963,7 +968,7 @@
 	#define Z_MAX_POS 400
 #else  //LK4_Pro
 		// The size of the print bed
-		#define X_BED_SIZE 220
+		#define X_BED_SIZE 225
 		#define Y_BED_SIZE 220
 
 		// Travel limits (mm) after homing, corresponding to endstop positions.
@@ -989,7 +994,7 @@
 #if ENABLED(MIN_SOFTWARE_ENDSTOPS)
   #define MIN_SOFTWARE_ENDSTOP_X
   #define MIN_SOFTWARE_ENDSTOP_Y
-  #define MIN_SOFTWARE_ENDSTOP_Z
+  //#define MIN_SOFTWARE_ENDSTOP_Z
 #endif
 
 // Max software endstops constrain movement within maximum coordinate bounds
@@ -1067,7 +1072,7 @@
 #if ENABLED (LK1_Pro_AutoBed)||ENABLED(LK4_Pro_BLTOUCH)
 	#define AUTO_BED_LEVELING_BILINEAR
 #endif
-//#define AUTO_BED_LEVELING_BILINEAR
+#define AUTO_BED_LEVELING_BILINEAR
 //#define AUTO_BED_LEVELING_UBL
 //#define MESH_BED_LEVELING
 
@@ -1075,7 +1080,7 @@
  * Normally G28 leaves leveling disabled on completion. Enable
  * this option to have G28 restore the prior leveling state.
  */
-//#define RESTORE_LEVELING_AFTER_G28
+#define RESTORE_LEVELING_AFTER_G28
 
 /**
  * Enable detailed logging of G28, G29, M48, etc.
@@ -1117,21 +1122,27 @@
 #else
 	//#define GRID_MAX_POINTS_X 3
 #endif
+  #define GRID_MAX_POINTS_X 5
   #define GRID_MAX_POINTS_Y GRID_MAX_POINTS_X
 
   // Set the boundaries for probing (where the probe can reach).
-#ifdef LK1_Pro_AutoBed
-	#define LEFT_PROBE_BED_POSITION  50
-	#define RIGHT_PROBE_BED_POSITION 210
-	#define FRONT_PROBE_BED_POSITION 47
-	#define BACK_PROBE_BED_POSITION  247
-#endif
-#ifdef LK4_Pro_BLTOUCH
-	#define LEFT_PROBE_BED_POSITION  50
-	#define RIGHT_PROBE_BED_POSITION 170
-	#define FRONT_PROBE_BED_POSITION 50
-	#define BACK_PROBE_BED_POSITION  170
-#endif // LK4_Pro_BLTOUCH
+//#ifdef LK1_Pro_AutoBed
+//	#define LEFT_PROBE_BED_POSITION  50
+//	#define RIGHT_PROBE_BED_POSITION 210
+//	#define FRONT_PROBE_BED_POSITION 47
+//	#define BACK_PROBE_BED_POSITION  247
+//#endif
+//#ifdef LK4_Pro_BLTOUCH
+//	#define LEFT_PROBE_BED_POSITION  50
+//	#define RIGHT_PROBE_BED_POSITION 170
+//	#define FRONT_PROBE_BED_POSITION 50
+//	#define BACK_PROBE_BED_POSITION  170
+//#endif // LK4_Pro_BLTOUCH
+
+  #define LEFT_PROBE_BED_POSITION  30
+  //#define RIGHT_PROBE_BED_POSITION X_BED_SIZE + X_PROBE_OFFSET_FROM_EXTRUDER - 5
+  #define FRONT_PROBE_BED_POSITION 30
+  #define BACK_PROBE_BED_POSITION  Y_BED_SIZE - 30
 
   // Probe along the Y axis, advancing X after each column
   //#define PROBE_Y_FIRST
@@ -1248,7 +1259,7 @@
 #if ENABLED (LK1_Pro_AutoBed)||ENABLED(LK4_Pro_BLTOUCH)
 	#define Z_SAFE_HOMING
 #else
-	//#define Z_SAFE_HOMING
+	#define Z_SAFE_HOMING
 #endif
 
 #if ENABLED(Z_SAFE_HOMING)
@@ -2040,9 +2051,9 @@
 // Delay (in milliseconds) before the next move will start, to give the servo time to reach its target angle.
 // 300ms is a good value but you can try less delay.
 // If the servo can't reach the requested position, increase it.
-#define SERVO_DELAY { 300 }
+#define SERVO_DELAY { 350 }
 
 // Only power servos during movement, otherwise leave off to prevent jitter
-//#define DEACTIVATE_SERVOS_AFTER_MOVE
+#define DEACTIVATE_SERVOS_AFTER_MOVE
 
 #endif // CONFIGURATION_H
