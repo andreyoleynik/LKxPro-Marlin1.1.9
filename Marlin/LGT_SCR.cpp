@@ -32,7 +32,7 @@ bool return_home = false;
 #endif // LK1_Pro
 bool xy_home = false;
 #ifdef LK4_Pro
-	bool xyz_home = false,z_home=false;
+	bool xyz_home = false,z_home=false,z_probe=false;
 #endif
 bool leveling_wait = false;
 int re_count = 0;
@@ -695,7 +695,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 #ifdef LK1_Pro
 				if (xy_home == true)
 #else  //LK4_Pro
-				if (xyz_home == true || xy_home == true)
+				if ((xyz_home == true || xy_home == true) && (!z_probe))
 #endif
 				{
 					if (current_position[X_AXIS] < X_MIN_POS)
@@ -722,7 +722,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 #ifdef LK1_Pro
 			if (xy_home == true)
 #else  //LK4_Pro
-			if (xyz_home == true || xy_home == true)
+			if ((xyz_home == true || xy_home == true) && (!z_probe))
 #endif
 			{
 				if (current_position[X_AXIS] < X_MIN_POS)
@@ -749,7 +749,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 #ifdef LK1_Pro
 			if (xy_home == true)
 #else  //LK4_Pro
-			if (xyz_home == true || xy_home == true)
+			if ((xyz_home == true || xy_home == true) && (!z_probe))
 #endif
 			{
 				if (current_position[X_AXIS] < X_MIN_POS)
@@ -777,7 +777,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 #ifdef LK1_Pro
 			if (xy_home == true)
 #else  //LK4_Pro
-			if (xyz_home == true || xy_home == true)
+			if ((xyz_home == true || xy_home == true) && (!z_probe))
 #endif
 			{
 				if (current_position[Y_AXIS] < Y_MIN_POS)
@@ -804,7 +804,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 #ifdef LK1_Pro
 			if (xy_home == true)
 #else  //LK4_Pro
-			if (xyz_home == true || xy_home == true)
+			if ((xyz_home == true || xy_home == true) && (!z_probe))
 #endif
 			{
 				if (current_position[Y_AXIS] < Y_MIN_POS)
@@ -831,7 +831,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 #ifdef LK1_Pro
 				if (xy_home == true)
 #else  //LK4_Pro
-				if (xyz_home == true || xy_home == true)
+				if ((xyz_home == true || xy_home == true) && (!z_probe))
 #endif
 				{
 					if (current_position[Y_AXIS] < Y_MIN_POS)
@@ -864,7 +864,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 
 			current_position[Z_AXIS] = current_position[Z_AXIS] - 10;
 #ifdef LK4_Pro
-			if (xyz_home == true || z_home == true)
+			if ((xyz_home == true || xy_home == true) && (!z_probe))
 			{
 				if (current_position[Z_AXIS] < Z_MIN_POS)
 					current_position[Z_AXIS] = Z_MIN_POS;
@@ -905,7 +905,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 
 				current_position[Z_AXIS] = current_position[Z_AXIS] - 1;
 #ifdef LK4_Pro
-				if (xyz_home == true || z_home == true)
+				if ((xyz_home == true || xy_home == true) && (!z_probe))
 				{
 					if (current_position[Z_AXIS] < Z_MIN_POS)
 						current_position[Z_AXIS] = Z_MIN_POS;
@@ -946,7 +946,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 
 			current_position[Z_AXIS] = current_position[Z_AXIS] - 0.1;
 #ifdef LK4_Pro
-			if (xyz_home == true || z_home == true)
+			if ((xyz_home == true || xy_home == true) && (!z_probe))
 			{
 				if (current_position[Z_AXIS] < Z_MIN_POS)
 					current_position[Z_AXIS] = Z_MIN_POS;
@@ -961,6 +961,87 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 				LGT_Send_Data_To_Screen(ADDR_VAL_LEVEL_Z_UP_DOWN, (uint16_t)(10 * level_z_height));
 			}
 #endif // LK1_Pro
+			break;
+		case eBT_MOVE_Z_PLUS_3:
+			if (planner.is_full())
+				break;
+
+			if (current_position[Z_AXIS] < Z_MAX_POS) {
+				current_position[Z_AXIS] = current_position[Z_AXIS] + 0.01;
+				if (current_position[Z_AXIS] > Z_MAX_POS)
+					current_position[Z_AXIS] = Z_MAX_POS;
+				LGT_Line_To_Current(Z_AXIS);
+
+#ifdef LK1_Pro
+				if (menu_type != eMENU_MOVE)
+				{
+					level_z_height = level_z_height + 0.01;
+					LGT_Send_Data_To_Screen(ADDR_VAL_LEVEL_Z_UP_DOWN, (uint16_t)(10 * level_z_height));
+				}
+#endif // LK1_Pro
+			}
+			break;
+		case eBT_MOVE_Z_MINUS_3:
+			if (planner.is_full())
+			break;
+
+			current_position[Z_AXIS] = current_position[Z_AXIS] - 0.01;
+#ifdef LK4_Pro
+			if ((xyz_home == true || xy_home == true) && (!z_probe))
+			{
+				if (current_position[Z_AXIS] < Z_MIN_POS)
+					current_position[Z_AXIS] = Z_MIN_POS;
+			}
+#endif // LK4_Pro
+			LGT_Line_To_Current(Z_AXIS);
+
+#ifdef LK1_Pro
+			if (menu_type != eMENU_MOVE)
+			{
+				level_z_height = level_z_height - 0.01;
+				LGT_Send_Data_To_Screen(ADDR_VAL_LEVEL_Z_UP_DOWN, (uint16_t)(10 * level_z_height));
+			}
+#endif // LK1_Pro
+			break;
+    case eBT_RESET_CURRENT_Z_AS_ZERO:
+//      char str[7];
+////      char str2[14];
+////      strcpy(str2, "M851 Z");
+//      dtostrf(current_position[Z_AXIS],3,2,str);
+////      strcat(str2, str);
+////      SERIAL_PROTOCOLPAIR("\n", str2);
+////      SERIAL_PROTOCOLPAIR("\n", "");
+////      enqueue_and_echo_commands_P(str2);
+////      enqueue_and_echo_commands_P(PSTR("M500")); 
+//
+//      char cmd[15];
+//      sprintf_P(cmd, PSTR("M851 Z%s"), str);
+      enqueue_and_echo_commands_P(PSTR("M851 Z0\nM500\nG28\nG0 X117 Y117\nM211 S0\nG0 Z0 F6000"));
+      z_probe = true;
+//      enqueue_and_echo_command_now(PSTR("M500"));
+//      enqueue_and_echo_command_now(PSTR("G28"));
+//      enqueue_and_echo_command_now(PSTR("G0 X110 Y110"));
+//      enqueue_and_echo_command_now(PSTR("М211 S0"));
+//      enqueue_and_echo_command_now(PSTR("G0 Z0"));
+      
+
+      break;
+		case eBT_SAVE_CURRENT_Z_AS_ZERO:
+      char str[7];
+//      char str2[14];
+//      strcpy(str2, "M851 Z");
+      dtostrf(current_position[Z_AXIS],3,2,str);
+//      strcat(str2, str);
+//      SERIAL_PROTOCOLPAIR("\n", str2);
+//      SERIAL_PROTOCOLPAIR("\n", "");
+//      enqueue_and_echo_commands_P(str2);
+//      enqueue_and_echo_commands_P(PSTR("M500")); 
+
+      char cmd[15];
+      sprintf_P(cmd, PSTR("M851 Z%s"), str);
+      enqueue_and_echo_command_now(cmd);
+      enqueue_and_echo_commands_P(PSTR("M500\nM211 S1\nG28\n"));
+      z_probe = true;
 			break;
 			//E Axis
 		case eBT_MOVE_E_PLUS_0:
@@ -1303,20 +1384,21 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 				menu_type = eMENU_HOME;
 			break;
 		case eBT_PRINT_FILE_CLEAN: //Cleaning sel_fileid
-      SERIAL_PROTOCOLPAIR("\nReinit sd card", menu_type);
+
+      //SERIAL_PROTOCOLPAIR("\nReinit sd card", menu_type);
+      if (sel_fileid > -1)
+      {
+        DEHILIGHT_FILE_NAME();
+        sel_fileid = -1;
+        LGT_Clean_DW_Display_Data(ADDR_TXT_PRINT_FILE_SELECT); //Cleaning sel_file txt
+        LGT_Clean_DW_Display_Data(ADDR_TXT_HOME_ELAP_TIME);    //Cleaning time
+      }
 
       card.initsd();
       sd_init_flag = false;
       delay(2);
 			LGT_Display_Filename();
 
-			if (sel_fileid > -1)
-			{
-				DEHILIGHT_FILE_NAME();
-				sel_fileid = -1;
-				LGT_Clean_DW_Display_Data(ADDR_TXT_PRINT_FILE_SELECT); //Cleaning sel_file txt
-				LGT_Clean_DW_Display_Data(ADDR_TXT_HOME_ELAP_TIME);    //Cleaning time
-			}
 			menu_type = eMENU_FILE;
 			break;
 //////////////////////////////////////////////////////////////////////////
@@ -1350,7 +1432,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 					xyz_home = true;
 				}
 				enqueue_and_echo_commands_P(PSTR("G1 Z10"));
-				enqueue_and_echo_commands_P(PSTR("G1 X30 Y30 F3000"));
+				enqueue_and_echo_commands_P(PSTR("G1 X20 Y20 F3000"));
 				enqueue_and_echo_commands_P(PSTR("G1 Z0"));
 			#endif
 			break;
@@ -1384,7 +1466,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 					xyz_home = true;
 				}
 				enqueue_and_echo_commands_P(PSTR("G1 Z10"));
-				enqueue_and_echo_commands_P(PSTR("G1 X190 Y30 F3000"));
+				enqueue_and_echo_commands_P(PSTR("G1 X215 Y20 F3000"));
 				enqueue_and_echo_commands_P(PSTR("G1 Z0"));
 			#endif
 			break;
@@ -1418,7 +1500,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 					xyz_home = true;
 				}
 				enqueue_and_echo_commands_P(PSTR("G1 Z10"));
-				enqueue_and_echo_commands_P(PSTR("G1 X190 Y190 F3000"));
+				enqueue_and_echo_commands_P(PSTR("G1 X215 Y215 F3000"));
 				enqueue_and_echo_commands_P(PSTR("G1 Z0"));
 			#endif
 			break;
@@ -1452,7 +1534,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 					xyz_home = true;
 				}
 				enqueue_and_echo_commands_P(PSTR("G1 Z10"));
-				enqueue_and_echo_commands_P(PSTR("G1 X30 Y190 F3000"));
+				enqueue_and_echo_commands_P(PSTR("G1 X20 Y215 F3000"));
 				enqueue_and_echo_commands_P(PSTR("G1 Z0"));
 			#endif
 			break;
@@ -1486,7 +1568,7 @@ void LGT_SCR::LGT_Analysis_DWIN_Screen_Cmd()
 					xyz_home = true;
 				}
 				enqueue_and_echo_commands_P(PSTR("G1 Z10"));
-				enqueue_and_echo_commands_P(PSTR("G1 X110 Y110 F3000"));
+				enqueue_and_echo_commands_P(PSTR("G1 X117 Y117 F3000"));
 				enqueue_and_echo_commands_P(PSTR("G1 Z0"));
 			#endif
 			break;
@@ -1697,9 +1779,8 @@ void LGT_SCR::LGT_Send_Data_To_Screen(unsigned int addr, char* buf)
 		MYSERIAL1.print(data_storage[i]);
 		delayMicroseconds(1);
 	}
-
-
 }
+
 void LGT_SCR::LGT_Send_Data_To_Screen1(unsigned int addr,const char* buf)
 {
 	memset(data_storage, 0, sizeof(data_storage));
@@ -1723,6 +1804,35 @@ void LGT_SCR::LGT_Send_Data_To_Screen1(unsigned int addr,const char* buf)
 		delayMicroseconds(1);
 	}
 }
+
+void LGT_SCR::UpdateM73Text(uint8_t progress_bar_percent, int16_t minutesLeft)
+{
+	if (progress_bar_percent > 100){
+		if (minutesLeft < 0) return;
+		char message[45];
+		int16_t h = minutesLeft / 60;
+		int16_t m = minutesLeft % 60;
+		sprintf_P(message, PSTR("Time left: %dh %dm"), h, m, progress_bar_percent);
+		LGT_Send_Data_To_Screen(ADDR_TXT_PRINT_M117, message);
+	}else{
+		if (minutesLeft < 0){
+			char message[45];
+			// int16_t h = minutesLeft / 60;
+			// int16_t m = minutesLeft % 60;
+			sprintf_P(message, PSTR("Progress: %d%%"), progress_bar_percent);
+			LGT_Send_Data_To_Screen(ADDR_TXT_PRINT_M117, message);
+		}else{
+			char message[45];
+			int16_t h = minutesLeft / 60;
+			int16_t m = minutesLeft % 60;
+			sprintf_P(message, PSTR("Remain: %02d:%02d Done: %d%%"), h, m, progress_bar_percent);
+			LGT_Send_Data_To_Screen(ADDR_TXT_PRINT_M117, message);
+		}
+
+	}
+
+}
+
 
 void LGT_SCR::LGT_Screen_System_Reset()
 {
@@ -1820,7 +1930,7 @@ void LGT_SCR::LGT_Printer_Data_Updata()
 		//endstops.update();
 		LGT_Send_Data_To_Screen(ADDR_VAL_MOVE_POS_X, (int16_t)(current_position[X_AXIS] * 10));
 		LGT_Send_Data_To_Screen(ADDR_VAL_MOVE_POS_Y, (int16_t)(current_position[Y_AXIS] * 10));
-		LGT_Send_Data_To_Screen(ADDR_VAL_MOVE_POS_Z, (int16_t)(current_position[Z_AXIS] * 10));
+		LGT_Send_Data_To_Screen(ADDR_VAL_MOVE_POS_Z, (int16_t)(current_position[Z_AXIS] * 100));
 		LGT_Send_Data_To_Screen(ADDR_VAL_MOVE_POS_E, (int16_t)(current_position[E_AXIS] * 10));
 		break;
 	case eMENU_TUNE_E:

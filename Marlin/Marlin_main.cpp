@@ -2212,19 +2212,26 @@ void clean_up_after_endstop_or_probe_move() {
     if (zprobe_zoffset < 0) z_dest -= zprobe_zoffset;
 
     NOMORE(z_dest, Z_MAX_POS);
-#ifdef LGT_MAC
-	if (current_position[Z_AXIS] > 0)
-	{
-		if (z_dest > current_position[Z_AXIS]);
-		do_blocking_move_to_z(z_dest);
-	}
-	else
-	{
-		do_blocking_move_to_z(current_position[Z_AXIS] + z_dest);
-	}
+ #ifdef LGT_MAC
+ 	if (current_position[Z_AXIS] > 0)
+ 	{
+ 		if (z_dest > current_position[Z_AXIS])
+ 		  do_blocking_move_to_z(z_dest);
+ 	}
+ 	else
+ 	{
+ 		do_blocking_move_to_z(current_position[Z_AXIS] + z_dest);
+ 	}
 #else
-	if (z_dest > current_position[Z_AXIS]);
-	do_blocking_move_to_z(z_dest);
+//        SERIAL_ECHOPAIR("do_probe_raise(", z_raise);
+//        SERIAL_CHAR(')');
+//        SERIAL_EOL();
+//        SERIAL_ECHOPAIR("z_dest = ", z_dest);
+//        SERIAL_EOL();
+//        SERIAL_ECHOPAIR("current_position[Z_AXIS] = ", current_position[Z_AXIS]);
+//        SERIAL_EOL();
+	if (z_dest > current_position[Z_AXIS])
+	    do_blocking_move_to_z(z_dest);
 #endif // LGT_MAC
   }
 
@@ -2257,6 +2264,9 @@ void clean_up_after_endstop_or_probe_move() {
 
     if (deploy_stow_condition && unknown_condition)
       do_probe_raise(MAX(Z_CLEARANCE_BETWEEN_PROBES, Z_CLEARANCE_DEPLOY_PROBE));
+
+        SERIAL_ECHOPAIR("1 current_position[Z_AXIS] = ", current_position[Z_AXIS]);
+        SERIAL_EOL();
 
     #if ENABLED(Z_PROBE_SLED) || ENABLED(Z_PROBE_ALLEN_KEY)
       #if ENABLED(Z_PROBE_SLED)
@@ -2298,6 +2308,9 @@ void clean_up_after_endstop_or_probe_move() {
           dock_sled(!deploy);
 
         #elif HAS_Z_SERVO_PROBE && DISABLED(BLTOUCH)
+
+        SERIAL_ECHOPAIR("servo current_position[Z_AXIS] = ", current_position[Z_AXIS]);
+        SERIAL_EOL();
 
           MOVE_SERVO(Z_PROBE_SERVO_NR, z_servo_angle[deploy ? 0 : 1]);
 
@@ -8341,7 +8354,7 @@ inline void gcode_M42() {
 
 #endif // G26_MESH_VALIDATION
 
-#if ENABLED(ULTRA_LCD) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
+//#if ENABLED(ULTRA_LCD) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
   /**
    * M73: Set percentage complete (for display on LCD)
    *
@@ -8352,12 +8365,21 @@ inline void gcode_M42() {
    *   This has no effect during an SD print job
    */
   inline void gcode_M73() {
-    if (!IS_SD_PRINTING && parser.seen('P')) {
+    uint8_t progress_bar_percent = 255;
+    int16_t minutesLeft = -1;
+    if (parser.seen('P')) {
       progress_bar_percent = parser.value_byte();
-      NOMORE(progress_bar_percent, 100);
+      // NOMORE(progress_bar_percent, 100);
     }
+
+    if (parser.seen('R')){
+      minutesLeft = parser.value_int();
+    }
+
+    // LGT_LCD.LGT_Send_Data_To_Screen1(ADDR_TXT_PRINT_M117,parser.string_arg);
+    LGT_LCD.UpdateM73Text(progress_bar_percent, minutesLeft);
   }
-#endif // ULTRA_LCD && LCD_SET_PROGRESS_MANUALLY
+//#endif // ULTRA_LCD && LCD_SET_PROGRESS_MANUALLY
 
 /**
  * M75: Start print timer
@@ -13060,9 +13082,9 @@ void process_parsed_command() {
         case 49: gcode_M49(); break;                              // M49: Toggle the G26 Debug Flag
       #endif
 
-      #if ENABLED(ULTRA_LCD) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
+      //#if ENABLED(ULTRA_LCD) && ENABLED(LCD_SET_PROGRESS_MANUALLY)
         case 73: gcode_M73(); break;                              // M73: Set Print Progress %
-      #endif
+      //#endif
       case 75: gcode_M75(); break;                                // M75: Start Print Job Timer
       case 76: gcode_M76(); break;                                // M76: Pause Print Job Timer
       case 77: gcode_M77(); break;                                // M77: Stop Print Job Timer

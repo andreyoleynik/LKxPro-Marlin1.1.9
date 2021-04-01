@@ -92,6 +92,9 @@ public:
 	void LGT_DW_Setup();
 	void LGT_Change_Filament(int fila_len);
 
+	void UpdateM73Text(uint8_t progress_bar_percent, int16_t minutesLeft);
+
+
 public:
 	void readScreenModel();	
 	static void test();

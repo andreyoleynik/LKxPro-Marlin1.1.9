@@ -1272,7 +1272,7 @@ void Planner::check_axes_activity() {
         thermalManager.soft_pwm_amount_fan[0] = CALC_FAN_SPEED(0);
       #endif
       #if HAS_FAN1
-        thermalManager.soft_pwm_amount_fan[1] = CALC_FAN_SPEED(1);
+        thermalManager.soft_pwm_amount_fan[1] = //CALC_FAN_SPEED(1);
       #endif
       #if HAS_FAN2
         thermalManager.soft_pwm_amount_fan[2] = CALC_FAN_SPEED(2);
@@ -1282,9 +1282,11 @@ void Planner::check_axes_activity() {
         analogWrite(FAN_PIN, CALC_FAN_SPEED(0));
       #endif
       #if HAS_FAN1
-        analogWrite(FAN1_PIN, CALC_FAN_SPEED(1));
+        //analogWrite(FAN1_PIN, CALC_FAN_SPEED(1));
+        analogWrite(FAN1_PIN, tail_fan_speed[1]);
       #endif
       #if HAS_FAN2
+        // analogWrite(FAN2_PIN, CALC_FAN_SPEED(2));
         analogWrite(FAN2_PIN, CALC_FAN_SPEED(2));
       #endif
     #endif

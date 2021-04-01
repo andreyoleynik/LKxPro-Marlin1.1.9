@@ -344,6 +344,7 @@ class Temperature {
      */
     static void manage_heater() _O2; // Added _O2 to work around a compiler error
 
+    static void RestorePWM();
     /**
      * Preheating hotends
      */

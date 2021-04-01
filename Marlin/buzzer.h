@@ -46,6 +46,7 @@ struct tone_t {
  */
 class Buzzer {
   private:
+    bool needRestore = false;
     struct state_t {
       tone_t   tone;
       uint32_t endtime;
@@ -122,7 +123,14 @@ class Buzzer {
       const millis_t now = millis();
 
       if (!this->state.endtime) {
-        if (this->buffer.isEmpty()) return;
+        if (this->buffer.isEmpty()) {
+          if (needRestore){
+            ::noTone(BEEPER_PIN);
+            thermalManager.RestorePWM();
+            needRestore = false;
+          }
+          return;
+        }
 
         this->state.tone = this->buffer.dequeue();
         this->state.endtime = now + this->state.tone.duration;
@@ -132,6 +140,7 @@ class Buzzer {
             CRITICAL_SECTION_START;
             ::tone(BEEPER_PIN, this->state.tone.frequency, this->state.tone.duration);
             CRITICAL_SECTION_END;
+            needRestore = true;
           #else
             this->on();
           #endif

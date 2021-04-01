@@ -1145,6 +1145,30 @@ void Temperature::updateTemperaturesFromRawValues() {
  * Initialize the temperature manager
  * The manager is implemented by periodic calls to manage_heater()
  */
+
+void Temperature::RestorePWM(){
+//7 = 30, 
+//6 = 122, 
+//5 = 244, 
+//4 = 488, 
+//3 = 976, 
+//2 = 3906
+//1 = 31250Hz
+
+  #if HAS_FAN0
+    #if ENABLED(FAST_PWM_FAN)
+      setPwmFrequency(FAN_PIN, 4); 
+    #endif
+  #endif
+
+  #if HAS_FAN1
+    #if ENABLED(FAST_PWM_FAN)
+      setPwmFrequency(FAN1_PIN, 2); 
+    #endif
+  #endif
+
+}
+
 void Temperature::init() {
 
   #if MB(RUMBA) && ( \
@@ -1187,22 +1211,18 @@ void Temperature::init() {
     #else
       SET_OUTPUT(FAN_PIN);
     #endif
-    #if ENABLED(FAST_PWM_FAN)
-      setPwmFrequency(FAN_PIN, 1); // No prescaling. Pwm frequency = F_CPU/256/8
-    #endif
   #endif
 
   #if HAS_FAN1
     SET_OUTPUT(FAN1_PIN);
-    #if ENABLED(FAST_PWM_FAN)
-      setPwmFrequency(FAN1_PIN, 1); // No prescaling. Pwm frequency = F_CPU/256/8
-    #endif
   #endif
 
+  RestorePWM();
+  
   #if HAS_FAN2
     SET_OUTPUT(FAN2_PIN);
     #if ENABLED(FAST_PWM_FAN)
-      setPwmFrequency(FAN2_PIN, 1); // No prescaling. Pwm frequency = F_CPU/256/8
+      setPwmFrequency(FAN2_PIN, 2); // No prescaling. Pwm frequency = F_CPU/256/8
     #endif
   #endif
 

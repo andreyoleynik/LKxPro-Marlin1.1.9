@@ -264,7 +264,13 @@ enum E_BUTTON_KEY {
 	eBT_PRINT_FILA_LOAD_OK,
 
 	eBT_PRINT_HOME_FILAMENT,		// added for JX scrren
-	eBT_PRINT_TUNE_FILAMENT			// added for JX scrren
+	eBT_PRINT_TUNE_FILAMENT,			// added for JX scrren
+
+	eBT_MOVE_Z_PLUS_3,   // 0045
+	eBT_MOVE_Z_MINUS_3,  // 0046       
+	eBT_SAVE_CURRENT_Z_AS_ZERO, //0047
+  eBT_RESET_CURRENT_Z_AS_ZERO //0048
+
 };
 
 enum E_MENU_TYPE {

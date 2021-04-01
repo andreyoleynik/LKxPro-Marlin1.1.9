@@ -100,7 +100,7 @@
 		#define Z_MAX_PIN          37
 	#else //LK4_Pro
 		#define Z_MIN_PIN          35
-		#define Z_MAX_PIN          37
+//		#define Z_MAX_PIN          37
 	#endif
 #else
 	#define Z_MIN_PIN          18
@@ -159,6 +159,7 @@
 	#endif
 #endif // !LGT_MAC
 
+#define BEEPER_PIN      4
 
 /**
  * Default pins for TMC software SPI
@@ -312,9 +313,9 @@
 #define SDSS               53
 #define LED_PIN            13
 
-#ifndef FILWIDTH_PIN
-  #define FILWIDTH_PIN      5   // Analog Input on AUX2
-#endif
+//#ifndef FILWIDTH_PIN
+//  #define FILWIDTH_PIN      5   // Analog Input on AUX2
+//#endif
 
 // define digital pin 4 for the filament runout sensor. Use the RAMPS 1.4 digital input 4 on the servos connector
 #ifndef LGT_MAC
@@ -324,8 +325,9 @@
 #endif
 
 #ifndef PS_ON_PIN
-  #define PS_ON_PIN        12
+  #define PS_ON_PIN        5
 #endif
+#define FAN1_PIN        6
 
 #if ENABLED(CASE_LIGHT_ENABLE) && !defined(CASE_LIGHT_PIN) && !defined(SPINDLE_LASER_ENABLE_PIN)
   #if NUM_SERVOS <= 1 // try to use servo connector first
